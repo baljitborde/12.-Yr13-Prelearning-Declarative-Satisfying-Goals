@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Declarative Programming Part 2 – Year 13 Pre-learning | CIE 9618</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+body{margin:0;padding:0;background:#f5f5f5;font-family:'Lato',sans-serif;font-size:14pt;color:#333333;line-height:1.65;}
+
+.opt{display:block;font-family:'Lato',sans-serif;font-size:14pt;padding:11px 18px;border:2px solid #d0d0d0;border-radius:6px;background:#ffffff;color:#333333;cursor:pointer;margin-bottom:10px;line-height:1.4;user-select:none;-webkit-user-select:none;transition:background 0.12s,border-color 0.12s;}
+.opt:hover{background:#e3f2fd;border-color:#007BA6;}
+.opt.selected{background:#e3f2fd;border-color:#007BA6;font-weight:700;}
+.opt.correct{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;font-weight:700;pointer-events:none;cursor:default;}
+.opt.wrong{background:#ffebee!important;border-color:#C62828!important;color:#7f0000!important;pointer-events:none;cursor:default;}
+.opt.reveal{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;font-weight:700;pointer-events:none;cursor:default;}
+.opt.locked{pointer-events:none;cursor:default;}
+
+.wopt{display:inline-block;font-family:'Courier New',Courier,monospace;font-size:13pt;font-weight:700;padding:8px 18px;border:2px solid #d0d0d0;border-radius:6px;background:#ffffff;color:#333333;cursor:pointer;margin:4px 6px 4px 0;line-height:1.4;user-select:none;-webkit-user-select:none;transition:background 0.12s,border-color 0.12s;}
+.wopt:hover{background:#e3f2fd;border-color:#007BA6;}
+.wopt.selected{background:#e3f2fd;border-color:#007BA6;color:#007BA6;}
+.wopt.correct{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;pointer-events:none;}
+.wopt.wrong{background:#ffebee!important;border-color:#C62828!important;color:#7f0000!important;pointer-events:none;}
+.wopt.reveal{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;pointer-events:none;}
+.wopt.locked{pointer-events:none;}
+
+.fb{display:none;font-family:'Lato',sans-serif;font-size:14pt;line-height:1.65;padding:14px 18px;border-radius:6px;margin-top:14px;}
+.fb-ok{background:#e8f5e9;color:#1b5e20;border:1px solid #81c784;}
+.fb-bad{background:#ffebee;color:#7f0000;border:1px solid #ef9a9a;}
+
+.tf-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:10px;padding:12px 16px;background:#fff;border:1px solid #d0d0d0;border-radius:6px;}
+.tf-stmt{flex:1;font-family:'Lato',sans-serif;font-size:14pt;color:#333;line-height:1.5;}
+.tf-btns{display:flex;gap:8px;flex-shrink:0;margin-top:2px;}
+.tf-btn{font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:7px 18px;border:2px solid #d0d0d0;border-radius:6px;background:#fff;color:#333;cursor:pointer;}
+.tf-btn:hover{background:#e3f2fd;border-color:#007BA6;}
+.tf-btn.ok{background:#e8f5e9;border-color:#388e3c;color:#1b5e20;pointer-events:none;}
+.tf-btn.bad{background:#ffebee;border-color:#C62828;color:#7f0000;pointer-events:none;}
+.tf-btn.show{background:#e8f5e9;border-color:#388e3c;color:#1b5e20;pointer-events:none;}
+.tf-row.done .tf-btn{pointer-events:none;}
+.tf-row{flex-wrap:wrap;}
+.tf-row > div:not(.tf-stmt):not(.tf-btns){flex-basis:100%;}
+
+.match-row{display:grid;grid-template-columns:200px 1fr;gap:8px;margin-bottom:8px;align-items:center;}
+.match-term{font-family:'Courier New',monospace;font-size:13pt;font-weight:700;padding:9px 12px;background:#1e1e2e;border-radius:6px;color:#a6e3a1;text-align:center;line-height:1.4;}
+.match-sel{font-family:'Lato',sans-serif;font-size:13pt;padding:9px 12px;border:2px solid #d0d0d0;border-radius:6px;background:#fff;color:#333;width:100%;cursor:pointer;}
+.match-sel:focus{outline:none;border-color:#007BA6;}
+.match-row.ok .match-sel{background:#e8f5e9;border-color:#388e3c;color:#1b5e20;}
+.match-row.bad .match-sel{background:#ffebee;border-color:#C62828;color:#7f0000;}
+.match-btn{display:inline-block;font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:8px 22px;border:2px solid #007BA6;border-radius:6px;background:#007BA6;color:#fff;cursor:pointer;margin-top:12px;}
+.match-btn:hover{background:#005f80;}
+.match-btn:disabled{background:#b3d4e8;border-color:#b3d4e8;cursor:default;}
+.match-result{display:none;font-family:'Lato',sans-serif;font-size:14pt;line-height:1.65;padding:14px 18px;border-radius:6px;margin-top:12px;}
+
+.drag-bank{display:flex;flex-wrap:wrap;gap:8px;padding:14px;background:#f0f8ff;border:2px dashed #b3d4e8;border-radius:6px;min-height:52px;margin-bottom:12px;}
+.drag-chip{font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:7px 16px;border:2px solid #007BA6;border-radius:6px;background:#e3f2fd;color:#007BA6;cursor:grab;white-space:nowrap;user-select:none;-webkit-user-select:none;}
+.drag-chip:active{cursor:grabbing;opacity:0.7;}
+.drag-chip.locked{cursor:default;pointer-events:none;opacity:0.75;}
+.drop-zone{display:inline-flex;align-items:center;justify-content:center;min-width:130px;padding:4px 8px;border-bottom:3px solid #007BA6;background:#fafafa;font-family:'Lato',sans-serif;font-size:12pt;color:#C62828;font-weight:700;vertical-align:middle;text-align:center;min-height:28px;}
+.drop-zone.drag-over{background:#e3f2fd;border-bottom-color:#C62828;}
+.sort-zone{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:6px;min-height:76px;}
+.check-btn{display:inline-block;font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:8px 22px;border:2px solid #007BA6;border-radius:6px;background:#007BA6;color:#fff;cursor:pointer;margin-top:12px;}
+.check-btn:hover{background:#005f80;}
+.check-btn:disabled{background:#b3d4e8;border-color:#b3d4e8;cursor:default;}
+.drag-result{display:none;font-family:'Lato',sans-serif;font-size:14pt;line-height:1.65;padding:14px 18px;border-radius:6px;margin-top:12px;}
+
+code{font-family:'Courier New',monospace;background:#f0f0f0;padding:1px 6px;border-radius:3px;font-size:13pt;}
+.cx-tbl{border-collapse:collapse;width:100%;font-size:13pt;}
+.cx-tbl th{background:#007BA6;color:#fff;padding:9px 14px;border:1px solid #005f80;text-align:center;}
+.cx-tbl td{border:1px solid #d0d0d0;padding:8px 14px;text-align:left;vertical-align:top;}
+.cx-tbl tr:nth-child(even) td{background:#f0f8ff;}
+.code{margin:0;background:#1e1e2e;border-radius:8px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12pt;line-height:1.85;color:#cdd6f4;white-space:pre;overflow-x:auto;}
+.code-lbl{font-size:11pt;font-weight:700;color:#6c7086;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;font-family:'Lato',sans-serif;white-space:normal;}
+.k{color:#f38ba8;}.v{color:#fab387;}.f{color:#a6e3a1;}.cm{color:#6c7086;}.s{color:#f9e2af;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.rec{display:flex;gap:4px;margin-bottom:4px;font-family:'Courier New',monospace;font-size:11pt;}
+.rec span{background:#fff;border:1px solid #b3d4e8;border-radius:3px;padding:2px 6px;}
+.rec span.key{background:#fff3e0;border-color:#e65100;font-weight:700;color:#e65100;}
+.rec span.addr{background:#1e1e2e;color:#fab387;border-color:#1e1e2e;min-width:34px;text-align:center;}
+.rec span.empty{color:#aaa;font-style:italic;}
+.slot-line{font-family:'Courier New',monospace;font-size:12pt;color:#cdd6f4;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.slot-line .ln{color:#6c7086;min-width:22px;text-align:right;}
+.drop-zone .drag-chip{white-space:normal;}
+.g2w{grid-template-columns:1.2fr 1fr;}
+@media (max-width:720px){
+  .g2,.g3,.g2w{grid-template-columns:1fr;}
+  .match-row{grid-template-columns:1fr;}
+  .tf-row{flex-direction:column;}
+}
+.cls{border:2px solid #007BA6;border-radius:6px;background:#fff;font-family:'Courier New',monospace;font-size:12pt;overflow:hidden;}
+.cls-h{background:#007BA6;color:#fff;font-weight:700;text-align:center;padding:6px 10px;font-family:'Lato',sans-serif;font-size:13pt;}
+.cls-s{padding:6px 12px;border-top:1px solid #b3d4e8;line-height:1.7;}
+.priv{color:#C62828;font-weight:700;}.pub{color:#1b5e20;font-weight:700;}
+.term{font-weight:700;color:#007BA6;}
+.g2>*,.g3>*{min-width:0;}
+
+.exq{background:#fffdf5;border:2px solid #e65100;border-radius:8px;padding:16px 20px;margin-bottom:14px;}
+.exq-lbl{font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#e65100;margin-bottom:8px;}
+.exq-q{font-size:14pt;font-weight:700;color:#333;line-height:1.5;margin-bottom:10px;}
+.exq-mk{color:#e65100;font-weight:700;white-space:nowrap;}
+.ans-btn{display:inline-block;font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:7px 18px;border:2px solid #e65100;border-radius:6px;background:#fff;color:#e65100;cursor:pointer;}
+.ans-btn:hover{background:#fff3e0;}
+.ans{display:none;margin-top:12px;background:#fff3e0;border-radius:6px;padding:12px 16px;font-size:13pt;line-height:1.7;}
+.ans ul{margin:4px 0 0;padding-left:1.2em;}
+.recap{border-left:4px solid #00796B;background:#e0f2f1;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;font-size:13.5pt;}
+.recap strong.h{color:#00796B;}
+
+.kb-tbl{border-collapse:collapse;width:100%;font-size:13pt;}
+.kb-tbl th{background:#007BA6;color:#fff;padding:7px 10px;text-align:left;border:1px solid #005f80;}
+.kb-tbl td{border:1px solid #cfd8dc;padding:7px 10px;vertical-align:top;background:#fff;}
+.trace td.ok{color:#2e7d32;font-weight:700;} .trace td.no{color:#c62828;font-weight:700;}
+.sort-zone .drag-chip{white-space:normal;line-height:1.35;}
+.ptr{display:inline-block;background:#fff3e0;border:1px solid #e65100;color:#e65100;font-weight:700;border-radius:4px;padding:2px 10px;font-family:'Courier New',monospace;font-size:12pt;margin:2px 6px 2px 0;}
+</style>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;">
+<div style="max-width:960px;margin:0 auto;padding:0 0 80px;">
+
+<!-- HEADER -->
+<div style="background:#007BA6;padding:32px 40px 28px;">
+  <div style="font-size:11pt;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">CIE A-Level Computer Science 9618 &bull; Unit 4 &bull; Topic 20.1 Programming Paradigms</div>
+  <div style="font-size:24pt;font-weight:700;color:#ffffff;margin:0 0 6px;">Declarative Programming (Part 2): Satisfying Goals</div>
+  <div style="font-size:14pt;color:rgba(255,255,255,0.88);">Pre-learning &nbsp;|&nbsp; Year 13 Computer Science &nbsp;|&nbsp; Part 2 of 2</div>
+  <div style="margin-top:14px;display:flex;gap:12px;flex-wrap:wrap;">
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 90 minutes</span>
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 6 sections</span>
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 20 interactive activities</span>
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 5 worked exam questions</span>
+  </div>
+</div>
+
+<!-- CONTENTS -->
+<div style="background:#ffffff;border-bottom:1px solid #d0d0d0;padding:20px 40px;">
+  <div style="font-size:12pt;font-weight:700;color:#007BA6;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;">Contents</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>Goals and the Inference Engine</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>Goals with No Variables</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>Goals with Variables</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>Satisfying Goals with Rules</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div>Writing Goals and Rules</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">6</div>Exam Practice</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">&#10003;</div>Summary</div>
+  </div>
+</div>
+
+<div style="padding:40px 40px 0;">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 1 — GOALS AND THE INFERENCE ENGINE
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Goals and the Inference Engine</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~10 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <p style="margin:0 0 14px;">In Part 1 you wrote facts and rules. Now you will <strong>use</strong> them. A <strong>goal</strong> is a question you ask the knowledge base. The <strong>inference engine</strong> tries to <em>satisfy</em> the goal by matching it against the clauses, working from the <strong>top</strong> of the knowledge base to the <strong>bottom</strong>.</p>
+    <div style="font-size:13pt;font-weight:700;color:#007BA6;margin-bottom:10px;">The knowledge base used on this page</div>
+    <div style="border:2px dashed #007BA6;background:#f0f8ff;border-radius:6px;padding:14px 18px;margin-bottom:16px;font-size:13.5pt;">
+      A small airline flies between five airports. London and Rome are <u>hubs</u>. A <u>flight(A, B)</u> fact means there is a direct flight <strong>from</strong> A <strong>to</strong> B (flights only go one way). An airport is <u>regional</u> if it is not a hub. You can get from X to Z with <u>one stop</u> if there is a flight from X to some airport Y and a flight from Y to Z.
+    </div>
+    <div class="code" style="font-size:11.5pt;margin-bottom:16px;"><div class="code-lbl">The airline knowledge base</div><span class="cm">01 </span><span class="f">airport</span>(london).
+<span class="cm">02 </span><span class="f">airport</span>(paris).
+<span class="cm">03 </span><span class="f">airport</span>(madrid).
+<span class="cm">04 </span><span class="f">airport</span>(rome).
+<span class="cm">05 </span><span class="f">airport</span>(berlin).
+<span class="cm">06 </span><span class="f">hub</span>(london).
+<span class="cm">07 </span><span class="f">hub</span>(rome).
+<span class="cm">08 </span><span class="f">flight</span>(london, paris).
+<span class="cm">09 </span><span class="f">flight</span>(london, madrid).
+<span class="cm">10 </span><span class="f">flight</span>(paris, rome).
+<span class="cm">11 </span><span class="f">flight</span>(madrid, rome).
+<span class="cm">12 </span><span class="f">flight</span>(rome, berlin).
+<span class="cm">13 </span><span class="f">regional</span>(<span class="v">X</span>) <span class="k">IF</span> <span class="f">airport</span>(<span class="v">X</span>) <span class="k">AND</span> <span class="k">NOT</span> <span class="f">hub</span>(<span class="v">X</span>).
+<span class="cm">14 </span><span class="f">onestop</span>(<span class="v">X</span>, <span class="v">Z</span>) <span class="k">IF</span> <span class="f">flight</span>(<span class="v">X</span>, <span class="v">Y</span>) <span class="k">AND</span> <span class="f">flight</span>(<span class="v">Y</span>, <span class="v">Z</span>).</div>
+    <div class="g2" style="margin-bottom:16px;align-items:start;">
+      <div>
+        <svg viewBox="0 0 320 220" width="100%" style="max-width:320px;display:block;margin:0 auto 12px;" aria-label="flight network">
+          <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#007BA6"/></marker></defs>
+          <g stroke="#007BA6" stroke-width="2" marker-end="url(#ar)">
+            <line x1="58" y1="100" x2="132" y2="45"/><line x1="58" y1="120" x2="132" y2="175"/>
+            <line x1="178" y1="45" x2="232" y2="95"/><line x1="178" y1="175" x2="232" y2="125"/>
+            <line x1="262" y1="92" x2="262" y2="48"/>
+          </g>
+          <g font-family="Lato,sans-serif" font-size="13" font-weight="700" text-anchor="middle">
+            <rect x="8" y="92" width="58" height="34" rx="6" fill="#007BA6"/><text x="37" y="114" fill="#fff">london</text>
+            <rect x="128" y="22" width="56" height="34" rx="6" fill="#e3f2fd" stroke="#007BA6" stroke-width="2"/><text x="156" y="44" fill="#007BA6">paris</text>
+            <rect x="122" y="164" width="66" height="34" rx="6" fill="#e3f2fd" stroke="#007BA6" stroke-width="2"/><text x="155" y="186" fill="#007BA6">madrid</text>
+            <rect x="232" y="92" width="58" height="34" rx="6" fill="#007BA6"/><text x="261" y="114" fill="#fff">rome</text>
+            <rect x="228" y="14" width="66" height="34" rx="6" fill="#e3f2fd" stroke="#007BA6" stroke-width="2"/><text x="261" y="36" fill="#007BA6">berlin</text>
+          </g>
+        </svg>
+        <div style="font-size:12.5pt;color:#555;text-align:center;">Dark boxes are hubs. Arrows show the direction of each flight.</div>
+      </div>
+      <div>
+        <table class="kb-tbl">
+          <tr><th>Term</th><th>Meaning</th></tr>
+          <tr><td><strong>Goal</strong></td><td>A question to be satisfied, e.g. <code>hub(X)</code></td></tr>
+          <tr><td><strong>Instantiation</strong></td><td>A variable being given a value, e.g. X = london</td></tr>
+          <tr><td><strong>Backtracking</strong></td><td>Going back to try the next matching clause, to find more answers</td></tr>
+        </table>
+      </div>
+    </div>
+    <div style="border-left:4px solid #007BA6;background:#e3f2fd;padding:12px 16px;border-radius:0 6px 6px 0;"><strong style="color:#007BA6;">CIE 9618 Specification (20.1):</strong> understanding of and ability to write code that can satisfy a goal using facts and rules.</div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9654; Activity 1 — Match the term to its meaning</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Use the dropdowns to match each term to its meaning.</div>
+    <div id="match1">
+      <div class="match-row"><div class="match-term">Goal</div><select class="match-sel" data-ans="goal"><option value="">— choose —</option><option value="back">Going back to try the next clause to find more answers</option><option value="cwa">Anything not in the knowledge base is treated as false</option><option value="goal">A question the knowledge base is asked</option><option value="inst">A variable being given a value</option><option value="ie">Searches the clauses to satisfy a goal</option></select></div>
+      <div class="match-row"><div class="match-term">Inference engine</div><select class="match-sel" data-ans="ie"><option value="">— choose —</option><option value="back">Going back to try the next clause to find more answers</option><option value="cwa">Anything not in the knowledge base is treated as false</option><option value="goal">A question the knowledge base is asked</option><option value="inst">A variable being given a value</option><option value="ie">Searches the clauses to satisfy a goal</option></select></div>
+      <div class="match-row"><div class="match-term">Instantiation</div><select class="match-sel" data-ans="inst"><option value="">— choose —</option><option value="back">Going back to try the next clause to find more answers</option><option value="cwa">Anything not in the knowledge base is treated as false</option><option value="goal">A question the knowledge base is asked</option><option value="inst">A variable being given a value</option><option value="ie">Searches the clauses to satisfy a goal</option></select></div>
+      <div class="match-row"><div class="match-term">Backtracking</div><select class="match-sel" data-ans="back"><option value="">— choose —</option><option value="back">Going back to try the next clause to find more answers</option><option value="cwa">Anything not in the knowledge base is treated as false</option><option value="goal">A question the knowledge base is asked</option><option value="inst">A variable being given a value</option><option value="ie">Searches the clauses to satisfy a goal</option></select></div>
+      <div class="match-row"><div class="match-term">Closed-world assumption</div><select class="match-sel" data-ans="cwa"><option value="">— choose —</option><option value="back">Going back to try the next clause to find more answers</option><option value="cwa">Anything not in the knowledge base is treated as false</option><option value="goal">A question the knowledge base is asked</option><option value="inst">A variable being given a value</option><option value="ie">Searches the clauses to satisfy a goal</option></select></div>
+    </div>
+    <button class="match-btn" id="match1-btn" onclick="checkMatch1()">&#10003; Check my answers</button>
+    <div class="match-result" id="match1-res"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 2 — Multiple choice</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">The goal <code>hub(X)</code> returns <strong>london</strong> before <strong>rome</strong>. Why?</div>
+    <div id="opts2">
+      <div class="opt" onclick="pickOpt(2,'a',this)">a) The answers are always in alphabetical order</div>
+      <div class="opt" onclick="pickOpt(2,'b',this)">b) The inference engine searches the clauses from top to bottom, and clause 06 comes before clause 07</div>
+      <div class="opt" onclick="pickOpt(2,'c',this)">c) London is a capital city</div>
+      <div class="opt" onclick="pickOpt(2,'d',this)">d) The engine returns the shortest word first</div>
+    </div>
+    <div class="fb" id="fb2"></div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 2 — GOALS WITH NO VARIABLES
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Goals with No Variables</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~15 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <div class="recap"><strong class="h">Quick recap:</strong> A goal with <strong>no variables</strong> is a yes/no question. It <strong>succeeds</strong> (true) if it matches a fact exactly, or can be proved by a rule. Otherwise it <strong>fails</strong> (false). Because of the <strong>closed-world assumption</strong>, anything that is not in the knowledge base is false.</div>
+    <table class="kb-tbl" style="margin-bottom:16px;">
+      <tr><th style="width:32%;">Goal</th><th style="width:16%;">Result</th><th>Why</th></tr>
+      <tr><td><code>flight(london, paris)</code></td><td><strong style="color:#2e7d32;">true</strong></td><td>Matches clause 08 exactly</td></tr>
+      <tr><td><code>flight(paris, london)</code></td><td><strong style="color:#c62828;">false</strong></td><td>No such fact: flights only go one way, and argument order matters</td></tr>
+      <tr><td><code>airport(dublin)</code></td><td><strong style="color:#c62828;">false</strong></td><td>Dublin is not in the knowledge base at all</td></tr>
+      <tr><td><code>regional(paris)</code></td><td><strong style="color:#2e7d32;">true</strong></td><td>Rule 13: airport(paris) is true AND hub(paris) cannot be found</td></tr>
+    </table>
+    <div class="exq">
+      <div class="exq-lbl">&#9998; Worked exam-style question</div>
+      <div class="exq-q">State the result of the goal <code>onestop(london, berlin)</code>. Explain your answer. <span class="exq-mk">[2]</span></div>
+      <div style="font-size:13pt;color:#555;margin-bottom:10px;">Think of your answer first, then reveal the mark scheme.</div>
+      <button class="ans-btn" onclick="toggleAns(1,this)">&#128065; Show model answer</button>
+      <div class="ans" id="ans1"><strong>Mark scheme — one mark for each point:</strong><ul><li>false</li><li>From London you can only reach Rome with one stop (via Paris or Madrid); Berlin needs a second stop, so there is no Y with flight(london, Y) and flight(Y, berlin)</li></ul><div style="margin-top:8px;"><strong style="color:#e65100;">Examiner tip:</strong> When asked to explain a "false", show that no value of the hidden variable makes every condition true.</div></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 3 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Will each goal succeed? Click <strong>True</strong> if it succeeds and <strong>False</strong> if it fails.</div>
+    <div class="tf-row" id="tf1">
+      <div class="tf-stmt"><code>airport(rome)</code></div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(1,true,true)">True</button><button class="tf-btn" onclick="doTF(1,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf2">
+      <div class="tf-stmt"><code>flight(paris, london)</code></div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(2,true,false)">True</button><button class="tf-btn" onclick="doTF(2,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf3">
+      <div class="tf-stmt"><code>hub(paris)</code></div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(3,true,false)">True</button><button class="tf-btn" onclick="doTF(3,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf4">
+      <div class="tf-stmt"><code>flight(rome, berlin)</code></div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(4,true,true)">True</button><button class="tf-btn" onclick="doTF(4,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf5">
+      <div class="tf-stmt"><code>regional(rome)</code></div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(5,true,false)">True</button><button class="tf-btn" onclick="doTF(5,false,false)">False</button></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 4 — Multiple choice</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">The goal <code>airport(dublin)</code> returns false. What is the best reason?</div>
+    <div id="opts4">
+      <div class="opt" onclick="pickOpt(4,'a',this)">a) Dublin is spelt incorrectly</div>
+      <div class="opt" onclick="pickOpt(4,'b',this)">b) There is no fact about Dublin, and anything not in the knowledge base is treated as false</div>
+      <div class="opt" onclick="pickOpt(4,'c',this)">c) airport is a rule, not a fact</div>
+      <div class="opt" onclick="pickOpt(4,'d',this)">d) The goal must use a variable to return a result</div>
+    </div>
+    <div class="fb" id="fb4"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 5 — Fill in the gap</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">A goal with no variables can only return <span style="background:#1e1e2e;color:#fab387;font-family:'Courier New',monospace;padding:2px 10px;border-radius:4px;font-size:13pt;">&#9744;</span>.</div>
+    <div id="opts5w">
+      <span class="wopt" onclick="pickWopt(5,'a',this)">a list of values</span>
+      <span class="wopt" onclick="pickWopt(5,'b',this)">true or false</span>
+      <span class="wopt" onclick="pickWopt(5,'c',this)">a number</span>
+      <span class="wopt" onclick="pickWopt(5,'d',this)">the clause number</span>
+    </div>
+    <div class="fb" id="fb5"></div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 3 — GOALS WITH VARIABLES
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Goals with Variables</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~20 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <div class="recap"><strong class="h">Quick recap:</strong> When a goal contains a <strong>variable</strong>, the inference engine finds every value that makes the goal true. Each time a clause matches, the variable is <strong>instantiated</strong> and the value is returned; the engine then <strong>backtracks</strong> to look for more matches further down.</div>
+    <div class="g2" style="margin-bottom:16px;align-items:start;">
+      <div>
+        <div class="code" style=""><div class="code-lbl">Goal</div><span class="f">flight</span>(london, <span class="v">X</span>)</div>
+        <table class="kb-tbl trace" style="margin-top:12px;">
+          <tr><th>Clause</th><th>Match?</th><th>X =</th></tr>
+          <tr><td>08 flight(london, paris)</td><td class="ok">yes</td><td>paris</td></tr>
+          <tr><td>09 flight(london, madrid)</td><td class="ok">yes</td><td>madrid</td></tr>
+          <tr><td>10 flight(paris, rome)</td><td class="no">no</td><td>first argument is not london</td></tr>
+          <tr><td>11, 12</td><td class="no">no</td><td></td></tr>
+        </table>
+        <p style="margin:10px 0 0;font-size:13pt;"><strong>Result:</strong> X = paris, madrid</p>
+      </div>
+      <div>
+        <table class="kb-tbl">
+          <tr><th>Goal</th><th>Result</th></tr>
+          <tr><td><code>flight(X, rome)</code></td><td>X = paris, madrid</td></tr>
+          <tr><td><code>flight(rome, X)</code></td><td>X = berlin</td></tr>
+          <tr><td><code>flight(berlin, X)</code></td><td>false (no flights from Berlin)</td></tr>
+          <tr><td><code>hub(X)</code></td><td>X = london, rome</td></tr>
+          <tr><td><code>flight(X, Y)</code></td><td>all five pairs, in clause order</td></tr>
+        </table>
+            <div style="border-left:4px solid #e65100;background:#fff3e0;padding:12px 16px;border-radius:0 6px 6px 0;"><strong style="color:#e65100;">Where the variable goes matters:</strong> <code>flight(london, X)</code> asks "where can I fly <em>to</em> from London?" but <code>flight(X, london)</code> asks "which airports fly <em>to</em> London?" (none).</div>
+      </div>
+    </div>
+    <div class="exq">
+      <div class="exq-lbl">&#9998; Worked exam-style question</div>
+      <div class="exq-q">State the result of the goal <code>flight(X, rome)</code>. <span class="exq-mk">[2]</span></div>
+      <div style="font-size:13pt;color:#555;margin-bottom:10px;">Think of your answer first, then reveal the mark scheme.</div>
+      <button class="ans-btn" onclick="toggleAns(2,this)">&#128065; Show model answer</button>
+      <div class="ans" id="ans2"><strong>Mark scheme — one mark for each point:</strong><ul><li>paris</li><li>madrid (in this order; both needed for 2 marks)</li></ul><div style="margin-top:8px;"><strong style="color:#e65100;">Examiner tip:</strong> Give every value, in the order the clauses appear. Missing one is a common way to drop a mark.</div></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 6 — Multiple choice — find every answer</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">What is the result of the goal <code>airport(X)</code>?</div>
+    <div id="opts6">
+      <div class="opt" onclick="pickOpt(6,'a',this)">a) X = london</div>
+      <div class="opt" onclick="pickOpt(6,'b',this)">b) X = london, paris, madrid, rome, berlin</div>
+      <div class="opt" onclick="pickOpt(6,'c',this)">c) X = berlin, london, madrid, paris, rome</div>
+      <div class="opt" onclick="pickOpt(6,'d',this)">d) true</div>
+    </div>
+    <div class="fb" id="fb6"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9654; Activity 7 — Match the goal to its result</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Use the dropdowns to choose the result each goal returns.</div>
+    <div id="match2">
+      <div class="match-row"><div class="match-term">hub(X)</div><select class="match-sel" data-ans="hub"><option value="">— choose —</option><option value="lon">X = paris, madrid</option><option value="none">false</option><option value="rome">X = berlin</option><option value="hub">X = london, rome</option><option value="mad">X = london</option></select></div>
+      <div class="match-row"><div class="match-term">flight(rome, X)</div><select class="match-sel" data-ans="rome"><option value="">— choose —</option><option value="lon">X = paris, madrid</option><option value="none">false</option><option value="rome">X = berlin</option><option value="hub">X = london, rome</option><option value="mad">X = london</option></select></div>
+      <div class="match-row"><div class="match-term">flight(berlin, X)</div><select class="match-sel" data-ans="none"><option value="">— choose —</option><option value="lon">X = paris, madrid</option><option value="none">false</option><option value="rome">X = berlin</option><option value="hub">X = london, rome</option><option value="mad">X = london</option></select></div>
+      <div class="match-row"><div class="match-term">flight(X, madrid)</div><select class="match-sel" data-ans="mad"><option value="">— choose —</option><option value="lon">X = paris, madrid</option><option value="none">false</option><option value="rome">X = berlin</option><option value="hub">X = london, rome</option><option value="mad">X = london</option></select></div>
+      <div class="match-row"><div class="match-term">flight(london, X)</div><select class="match-sel" data-ans="lon"><option value="">— choose —</option><option value="lon">X = paris, madrid</option><option value="none">false</option><option value="rome">X = berlin</option><option value="hub">X = london, rome</option><option value="mad">X = london</option></select></div>
+    </div>
+    <button class="match-btn" id="match2-btn" onclick="checkMatch2()">&#10003; Check my answers</button>
+    <div class="match-result" id="match2-res"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 8 — Write the goals</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Drag the goal that answers each question. Three chips are not needed.</div>
+    <div class="drag-bank" id="bank8">
+      <div class="drag-chip" draggable="true">flight(X, rome)</div>
+      <div class="drag-chip" draggable="true">flight(rome, X)</div>
+      <div class="drag-chip" draggable="true">hub(X)</div>
+      <div class="drag-chip" draggable="true">flight(madrid, X)</div>
+      <div class="drag-chip" draggable="true">Hub(X)</div>
+      <div class="drag-chip" draggable="true">flight(x, rome)</div>
+    </div>
+    <table class="kb-tbl" style="margin-bottom:12px;">
+      <tr><th>Question</th><th style="width:44%;">Goal</th></tr>
+      <tr><td>Which airports have a direct flight to Rome?</td><td><span id="dz8a" class="drop-zone" style="min-width:200px;">?</span></td></tr>
+      <tr><td>Where can you fly directly from Madrid?</td><td><span id="dz8b" class="drop-zone" style="min-width:200px;">?</span></td></tr>
+      <tr><td>Which airports are hubs?</td><td><span id="dz8c" class="drop-zone" style="min-width:200px;">?</span></td></tr>
+    </table>
+    <button class="check-btn" id="btn8" onclick="checkDrop8()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res8"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 9 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Click True or False for each statement about goals with variables.</div>
+    <div class="tf-row" id="tf6">
+      <div class="tf-stmt"><code>flight(x, rome)</code> finds every airport with a flight to Rome.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(6,true,false)">True</button><button class="tf-btn" onclick="doTF(6,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf7">
+      <div class="tf-stmt">After finding one answer, the engine backtracks to look for more.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(7,true,true)">True</button><button class="tf-btn" onclick="doTF(7,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf8">
+      <div class="tf-stmt">If no clause matches a goal with a variable, the result is false.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(8,true,true)">True</button><button class="tf-btn" onclick="doTF(8,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf9">
+      <div class="tf-stmt"><code>flight(X, Y)</code> is an invalid goal because it has two variables.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(9,true,false)">True</button><button class="tf-btn" onclick="doTF(9,false,false)">False</button></div>
+    </div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 4 — SATISFYING GOALS WITH RULES
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Satisfying Goals with Rules</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~20 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <div class="recap"><strong class="h">Quick recap:</strong> When a goal matches the head of a <strong>rule</strong>, the inference engine must satisfy every condition in the rule's body, from left to right. If a later condition fails, it <strong>backtracks</strong> to an earlier condition and tries the next possible value.</div>
+    <div style="font-size:13pt;font-weight:700;color:#007BA6;margin-bottom:10px;">Tracing the goal <code>onestop(london, Z)</code> using rule 14</div>
+    <div style="margin-bottom:12px;"><div class="code" style=""><span class="cm">14 </span><span class="f">onestop</span>(<span class="v">X</span>, <span class="v">Z</span>) <span class="k">IF</span> <span class="f">flight</span>(<span class="v">X</span>, <span class="v">Y</span>) <span class="k">AND</span> <span class="f">flight</span>(<span class="v">Y</span>, <span class="v">Z</span>).</div></div>
+    <div style="overflow-x:auto;margin-bottom:16px;">
+      <table class="kb-tbl trace">
+        <tr><th style="width:8%;">Step</th><th>What the engine does</th><th style="width:22%;">Result</th></tr>
+        <tr><td>1</td><td>Matches the goal with the head of rule 14, so X = london</td><td>X = london</td></tr>
+        <tr><td>2</td><td>First condition <code>flight(london, Y)</code>: clause 08 matches</td><td>Y = paris</td></tr>
+        <tr><td>3</td><td>Second condition <code>flight(paris, Z)</code>: clause 10 matches</td><td class="ok">Z = rome &#10003; output</td></tr>
+        <tr><td>4</td><td><strong>Backtracks</strong> to the first condition and finds the next match, clause 09</td><td>Y = madrid</td></tr>
+        <tr><td>5</td><td>Second condition <code>flight(madrid, Z)</code>: clause 11 matches</td><td class="ok">Z = rome &#10003; output</td></tr>
+        <tr><td>6</td><td>Backtracks again: no more flights from London, so the search ends</td><td>finished</td></tr>
+      </table>
+    </div>
+    <p style="margin:0 0 14px;"><strong>Result:</strong> Z = rome, rome. Rome is returned <strong>twice</strong>, because there are two different routes (via Paris and via Madrid). The engine reports every way it can satisfy the goal.</p>
+    <div style="border-left:4px solid #9966FF;background:#f3e5f5;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;"><strong style="color:#9966FF;">NOT in a goal:</strong> for <code>regional(X)</code>, the engine takes each airport in turn from clauses 01 to 05, then checks <code>NOT hub(X)</code>. London and Rome fail the NOT; Paris, Madrid and Berlin succeed.</div>
+    <div class="exq">
+      <div class="exq-lbl">&#9998; Worked exam-style question</div>
+      <div class="exq-q">Explain how the inference engine finds the first result for the goal <code>regional(X)</code>. <span class="exq-mk">[3]</span></div>
+      <div style="font-size:13pt;color:#555;margin-bottom:10px;">Think of your answer first, then reveal the mark scheme.</div>
+      <button class="ans-btn" onclick="toggleAns(3,this)">&#128065; Show model answer</button>
+      <div class="ans" id="ans3"><strong>Mark scheme — one mark for each point:</strong><ul><li>Matches the goal with the head of rule 13 / tries <code>airport(X)</code> first and instantiates X = london (clause 01)</li><li><code>NOT hub(london)</code> fails because hub(london) is a fact (clause 06), so it backtracks</li><li>Tries X = paris (clause 02); hub(paris) cannot be found, so NOT succeeds and paris is returned</li></ul><div style="margin-top:8px;"><strong style="color:#e65100;">Examiner tip:</strong> Name the clauses and the values of X at each step. Use the word "backtracks".</div></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 10 — Put the trace in order</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Drag the steps into the order the inference engine follows for the goal <code>onestop(X, berlin)</code>.</div>
+    <div class="drag-bank" id="bank10">
+      <div class="drag-chip" draggable="true" style="white-space:normal;max-width:430px;line-height:1.4;">flight(paris, berlin) fails, so it backtracks</div>
+      <div class="drag-chip" draggable="true" style="white-space:normal;max-width:430px;line-height:1.4;">X = paris, Y = rome (clause 10); flight(rome, berlin) succeeds, so X = paris is output</div>
+      <div class="drag-chip" draggable="true" style="white-space:normal;max-width:430px;line-height:1.4;">X = london, Y = paris (clause 08)</div>
+      <div class="drag-chip" draggable="true" style="white-space:normal;max-width:430px;line-height:1.4;">X = madrid, Y = rome (clause 11); flight(rome, berlin) succeeds, so X = madrid is output</div>
+      <div class="drag-chip" draggable="true" style="white-space:normal;max-width:430px;line-height:1.4;">X = london, Y = madrid (clause 09); flight(madrid, berlin) fails, so it backtracks</div>
+    </div>
+    <div style="background:#1e1e2e;border-radius:6px;padding:16px 20px;overflow-x:auto;">
+      <div class="slot-line"><span class="ln">1</span><span id="dz10a" class="drop-zone" style="min-width:720px;">?</span></div>
+      <div class="slot-line"><span class="ln">2</span><span id="dz10b" class="drop-zone" style="min-width:720px;">?</span></div>
+      <div class="slot-line"><span class="ln">3</span><span id="dz10c" class="drop-zone" style="min-width:720px;">?</span></div>
+      <div class="slot-line"><span class="ln">4</span><span id="dz10d" class="drop-zone" style="min-width:720px;">?</span></div>
+      <div class="slot-line"><span class="ln">5</span><span id="dz10e" class="drop-zone" style="min-width:720px;">?</span></div>
+    </div>
+    <button class="check-btn" id="btn10" onclick="checkDrop10()">&#10003; Check my order</button>
+    <div class="drag-result" id="res10"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 11 — Multiple choice — rule with NOT</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">What is the result of the goal <code>regional(X)</code>?</div>
+    <div id="opts11">
+      <div class="opt" onclick="pickOpt(11,'a',this)">a) X = london, rome</div>
+      <div class="opt" onclick="pickOpt(11,'b',this)">b) X = paris, madrid, berlin</div>
+      <div class="opt" onclick="pickOpt(11,'c',this)">c) X = paris</div>
+      <div class="opt" onclick="pickOpt(11,'d',this)">d) true</div>
+    </div>
+    <div class="fb" id="fb11"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 12 — Multiple choice — trace the rule</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">What is the result of the goal <code>onestop(paris, Z)</code>?</div>
+    <div id="opts12">
+      <div class="opt" onclick="pickOpt(12,'a',this)">a) Z = rome</div>
+      <div class="opt" onclick="pickOpt(12,'b',this)">b) Z = berlin</div>
+      <div class="opt" onclick="pickOpt(12,'c',this)">c) Z = rome, berlin</div>
+      <div class="opt" onclick="pickOpt(12,'d',this)">d) false</div>
+    </div>
+    <div class="fb" id="fb12"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 13 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Click True or False for each statement about backtracking.</div>
+    <div class="tf-row" id="tf10">
+      <div class="tf-stmt">Backtracking means going back to an earlier condition to try the next possible value.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(10,true,true)">True</button><button class="tf-btn" onclick="doTF(10,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf11">
+      <div class="tf-stmt">In a rule, the conditions after IF are checked from right to left.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(11,true,false)">True</button><button class="tf-btn" onclick="doTF(11,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf12">
+      <div class="tf-stmt">The same answer can be returned more than once if there is more than one way to satisfy the goal.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(12,true,true)">True</button><button class="tf-btn" onclick="doTF(12,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf13">
+      <div class="tf-stmt">The engine stops searching as soon as one condition fails.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(13,true,false)">True</button><button class="tf-btn" onclick="doTF(13,false,false)">False</button></div>
+    </div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 5 — WRITING GOALS AND RULES
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Writing Goals and Rules</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~15 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <div class="recap"><strong class="h">Quick recap:</strong> In the exam you may be asked to write a <strong>goal</strong> that answers a question, or to write a new <strong>rule</strong> and then a goal that uses it. To write a goal: choose the predicate, put the values you know in their argument positions, and put a variable where the answer should go.</div>
+    <div class="g2" style="margin-bottom:16px;align-items:start;">
+      <div>
+        <div class="code" style=""><div class="code-lbl">A new rule</div><span class="cm">// New rule: a flight that lands at a hub</span>
+<span class="cm">15 </span><span class="f">hubflight</span>(<span class="v">X</span>, <span class="v">Y</span>) <span class="k">IF</span> <span class="f">flight</span>(<span class="v">X</span>, <span class="v">Y</span>) <span class="k">AND</span> <span class="f">hub</span>(<span class="v">Y</span>).</div>
+      </div>
+      <table class="kb-tbl">
+        <tr><th>Goal</th><th>Result</th></tr>
+        <tr><td><code>hubflight(X, Y)</code></td><td>X = paris, Y = rome; X = madrid, Y = rome</td></tr>
+        <tr><td><code>hubflight(london, Y)</code></td><td>false (London only flies to Paris and Madrid)</td></tr>
+        <tr><td><code>hubflight(paris, rome)</code></td><td>true</td></tr>
+      </table>
+    </div>
+    <div class="exq">
+      <div class="exq-lbl">&#9998; Worked exam-style question</div>
+      <div class="exq-q">Write a goal to find all the airports you can fly to directly from London. <span class="exq-mk">[1]</span></div>
+      <div style="font-size:13pt;color:#555;margin-bottom:10px;">Think of your answer first, then reveal the mark scheme.</div>
+      <button class="ans-btn" onclick="toggleAns(4,this)">&#128065; Show model answer</button>
+      <div class="ans" id="ans4"><strong>Mark scheme — one mark for each point:</strong><ul><li><code>flight(london, X)</code> (any variable name starting with a capital letter)</li></ul><div style="margin-top:8px;"><strong style="color:#e65100;">Examiner tip:</strong> A goal has no full stop and no clause number in the answer. Use lower case for london and a capital for the variable.</div></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9654; Activity 14 — Match the question to the goal</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Choose the goal that answers each question.</div>
+    <div id="match3">
+      <div class="match-row"><div class="match-term">Is Paris a hub?</div><select class="match-sel" data-ans="q1"><option value="">— choose —</option><option value="q3">flight(X, rome)</option><option value="q5">regional(X)</option><option value="q1">hub(paris)</option><option value="q4">onestop(london, X)</option><option value="q2">flight(rome, X)</option></select></div>
+      <div class="match-row"><div class="match-term">Where can you fly directly from Rome?</div><select class="match-sel" data-ans="q2"><option value="">— choose —</option><option value="q3">flight(X, rome)</option><option value="q5">regional(X)</option><option value="q1">hub(paris)</option><option value="q4">onestop(london, X)</option><option value="q2">flight(rome, X)</option></select></div>
+      <div class="match-row"><div class="match-term">Which airports fly directly to Rome?</div><select class="match-sel" data-ans="q3"><option value="">— choose —</option><option value="q3">flight(X, rome)</option><option value="q5">regional(X)</option><option value="q1">hub(paris)</option><option value="q4">onestop(london, X)</option><option value="q2">flight(rome, X)</option></select></div>
+      <div class="match-row"><div class="match-term">Where can you reach from London with one stop?</div><select class="match-sel" data-ans="q4"><option value="">— choose —</option><option value="q3">flight(X, rome)</option><option value="q5">regional(X)</option><option value="q1">hub(paris)</option><option value="q4">onestop(london, X)</option><option value="q2">flight(rome, X)</option></select></div>
+      <div class="match-row"><div class="match-term">Which airports are not hubs?</div><select class="match-sel" data-ans="q5"><option value="">— choose —</option><option value="q3">flight(X, rome)</option><option value="q5">regional(X)</option><option value="q1">hub(paris)</option><option value="q4">onestop(london, X)</option><option value="q2">flight(rome, X)</option></select></div>
+    </div>
+    <button class="match-btn" id="match3-btn" onclick="checkMatch3()">&#10003; Check my answers</button>
+    <div class="match-result" id="match3-res"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 15 — Write the rule</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Write a rule <code>twoway(X, Y)</code> that is true if there is a flight from X to Y <strong>and</strong> a flight back from Y to X. Three chips are not needed.</div>
+    <div class="drag-bank" id="bank15">
+      <div class="drag-chip" draggable="true">flight(Y, X).</div>
+      <div class="drag-chip" draggable="true">flight(X, Y)</div>
+      <div class="drag-chip" draggable="true">OR</div>
+      <div class="drag-chip" draggable="true">AND</div>
+      <div class="drag-chip" draggable="true">flight(X, Y).</div>
+      <div class="drag-chip" draggable="true">NOT</div>
+    </div>
+    <div style="background:#1e1e2e;border-radius:6px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12.5pt;line-height:2.8;color:#cdd6f4;overflow-x:auto;">
+      <span style="color:#6c7086;">16</span>&nbsp;&nbsp;<span class="f">twoway</span>(<span class="v">X</span>, <span class="v">Y</span>) <span class="k">IF</span> <span id="dz15a" class="drop-zone" style="min-width:140px;">?</span> <span id="dz15b" class="drop-zone" style="min-width:60px;">?</span> <span id="dz15c" class="drop-zone" style="min-width:140px;">?</span>
+    </div>
+    <button class="check-btn" id="btn15" onclick="checkDrop15()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res15"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 16 — Multiple choice — use the new rule</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Using rule 15, what is the result of the goal <code>hubflight(X, rome)</code>?</div>
+    <div id="opts16">
+      <div class="opt" onclick="pickOpt(16,'a',this)">a) X = london</div>
+      <div class="opt" onclick="pickOpt(16,'b',this)">b) X = paris, madrid</div>
+      <div class="opt" onclick="pickOpt(16,'c',this)">c) X = rome</div>
+      <div class="opt" onclick="pickOpt(16,'d',this)">d) false</div>
+    </div>
+    <div class="fb" id="fb16"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 17 — Fill in the gap</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">To find every airport you can fly to from Berlin, the goal is <code>flight(berlin, </code><span style="background:#1e1e2e;color:#fab387;font-family:'Courier New',monospace;padding:2px 10px;border-radius:4px;font-size:13pt;">&#9744;</span><code>)</code>.</div>
+    <div id="opts17w">
+      <span class="wopt" onclick="pickWopt(17,'a',this)">X</span>
+      <span class="wopt" onclick="pickWopt(17,'b',this)">x</span>
+      <span class="wopt" onclick="pickWopt(17,'c',this)">rome</span>
+      <span class="wopt" onclick="pickWopt(17,'d',this)">?</span>
+    </div>
+    <div class="fb" id="fb17"></div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 6 — EXAM PRACTICE
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">6</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Exam Practice</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~10 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <p style="margin:0 0 14px;">This is the clubs knowledge base you wrote in Part 1. Use it for the final activities.</p>
+    <div class="g2" style="margin-bottom:16px;align-items:start;">
+      <div class="code" style="font-size:11.5pt;"><div class="code-lbl">The clubs knowledge base</div><span class="cm">01 </span><span class="f">student</span>(asha).
+<span class="cm">02 </span><span class="f">student</span>(ben).
+<span class="cm">03 </span><span class="f">meets</span>(chess, monday).
+<span class="cm">04 </span><span class="f">meets</span>(coding, tuesday).
+<span class="cm">05 </span><span class="f">attends</span>(asha, chess).
+<span class="cm">06 </span><span class="f">attends</span>(ben, coding).
+<span class="cm">07 </span><span class="f">attends</span>(asha, coding).
+<span class="cm">08 </span><span class="f">busy</span>(<span class="v">S</span>, <span class="v">D</span>) <span class="k">IF</span> <span class="f">attends</span>(<span class="v">S</span>, <span class="v">C</span>) <span class="k">AND</span> <span class="f">meets</span>(<span class="v">C</span>, <span class="v">D</span>).</div>
+      <div>
+        <table class="kb-tbl">
+          <tr><th>Exam question type</th><th>What to do</th></tr>
+          <tr><td>State the result of a goal</td><td>List every value in clause order, or write true / false</td></tr>
+          <tr><td>Write a goal</td><td>Known values in lower case, a capital-letter variable for the answer, no full stop</td></tr>
+          <tr><td>Explain how a goal is satisfied</td><td>Name the clauses, the values instantiated and where backtracking happens</td></tr>
+          <tr><td>Write a rule</td><td>Head IF conditions joined with AND / NOT, full stop</td></tr>
+        </table>
+      </div>
+    </div>
+    <div style="border-left:4px solid #007BA6;background:#e3f2fd;padding:12px 16px;border-radius:0 6px 6px 0;"><strong style="color:#007BA6;">Exam technique:</strong> write the trace down. Note each clause number and each variable value as you go, exactly like the trace table in Section 4.</div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 18 — Multiple choice — trace the goal</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">What is the result of the goal <code>busy(asha, D)</code>?</div>
+    <div id="opts18">
+      <div class="opt" onclick="pickOpt(18,'a',this)">a) D = monday</div>
+      <div class="opt" onclick="pickOpt(18,'b',this)">b) D = monday, tuesday</div>
+      <div class="opt" onclick="pickOpt(18,'c',this)">c) D = tuesday, monday</div>
+      <div class="opt" onclick="pickOpt(18,'d',this)">d) true</div>
+    </div>
+    <div class="fb" id="fb18"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 19 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Will each goal succeed? Click <strong>True</strong> if it succeeds and <strong>False</strong> if it fails.</div>
+    <div class="tf-row" id="tf14">
+      <div class="tf-stmt"><code>busy(ben, tuesday)</code></div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(14,true,true)">True</button><button class="tf-btn" onclick="doTF(14,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf15">
+      <div class="tf-stmt"><code>busy(ben, monday)</code></div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(15,true,false)">True</button><button class="tf-btn" onclick="doTF(15,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf16">
+      <div class="tf-stmt"><code>attends(asha, coding)</code></div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(16,true,true)">True</button><button class="tf-btn" onclick="doTF(16,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf17">
+      <div class="tf-stmt"><code>student(chess)</code></div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(17,true,false)">True</button><button class="tf-btn" onclick="doTF(17,false,false)">False</button></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 20 — Review: fill in the gaps</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Drag a word into each gap to complete the summary. Two chips are not needed.</div>
+    <div class="drag-bank" id="bank20">
+      <div class="drag-chip" draggable="true">backtracks</div>
+      <div class="drag-chip" draggable="true">goal</div>
+      <div class="drag-chip" draggable="true">compiles</div>
+      <div class="drag-chip" draggable="true">false</div>
+      <div class="drag-chip" draggable="true">instantiated</div>
+      <div class="drag-chip" draggable="true">top to bottom</div>
+      <div class="drag-chip" draggable="true">alphabetical</div>
+      <div class="drag-chip" draggable="true">variable</div>
+    </div>
+    <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:16px 20px;font-size:14pt;line-height:2.6;">
+      A <span id="dz20a" class="drop-zone">?</span> is a question asked of the knowledge base. The inference engine searches the clauses from <span id="dz20b" class="drop-zone">?</span>. When a clause matches, each <span id="dz20c" class="drop-zone">?</span> in the goal is <span id="dz20d" class="drop-zone">?</span> to a value. To find more answers, the engine <span id="dz20e" class="drop-zone">?</span>. If nothing matches, the goal returns <span id="dz20f" class="drop-zone">?</span>.
+    </div>
+    <button class="check-btn" id="btn20" onclick="checkDrop20()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res20"></div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div style="background:#007BA6;border-radius:8px;padding:28px 32px;margin-bottom:20px;">
+  <div style="font-size:16pt;font-weight:700;color:#ffffff;margin-bottom:16px;">&#10003; Summary — CIE 9618 Topic 20.1: Declarative Programming (Part 2)</div>
+  <div class="g2" style="gap:10px;">
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Goals:</strong> a goal is a question. With no variables it returns true or false; with variables it returns every value that satisfies it.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Search order:</strong> the inference engine works through the clauses from top to bottom, so answers come back in clause order.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Closed world:</strong> anything not in the knowledge base, and not provable by a rule, is false.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Instantiation:</strong> when a clause matches, each variable is given a value, e.g. <code style="background:rgba(0,0,0,0.2);color:#fff;">flight(london, X)</code> gives X = paris, madrid.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Rules and backtracking:</strong> conditions are checked left to right. If one fails, the engine backtracks to an earlier condition and tries the next value.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Writing goals:</strong> known values in lower case in the right argument position, and a capital-letter variable where the answer goes.</div>
+  </div>
+</div>
+
+</div></div>
+<script>
+// ══════════════════════════════════════════════════
+//  WORKED EXAM QUESTIONS — reveal model answer
+// ══════════════════════════════════════════════════
+function toggleAns(n, btn) {
+  var a = document.getElementById('ans' + n);
+  var open = a.style.display === 'block';
+  a.style.display = open ? 'none' : 'block';
+  btn.innerHTML = open ? '&#128065; Show model answer' : '&#128065; Hide model answer';
+}
+
+// ══════════════════════════════════════════════════
+//  MCQ — pure JS, auto-submits on click
+// ══════════════════════════════════════════════════
+var mcqChosen = {};
+var MCQ_CORRECT = {"2": "b", "4": "b", "6": "b", "11": "b", "12": "b", "16": "b", "18": "b"};
+var MCQ_FB = {
+ "2": {
+  "ok": "&#10003; Correct! The engine works through the knowledge base in order, so answers come out in the order the matching clauses appear.",
+  "a": "&#10007; It is a coincidence that this happens to be alphabetical. The order comes from the clause order: 06 then 07.",
+  "c": "&#10007; The engine knows nothing about capital cities. It searches the clauses from top to bottom.",
+  "d": "&#10007; Word length has no effect. The answers follow the order of the clauses."
+ },
+ "4": {
+  "ok": "&#10003; Correct! This is the closed-world assumption: if it cannot be found or proved, it is false.",
+  "a": "&#10007; The spelling is fine. Dublin simply is not in the knowledge base.",
+  "c": "&#10007; airport is a fact (clauses 01 to 05). The goal fails because Dublin is not one of them.",
+  "d": "&#10007; Goals without variables are allowed. They return true or false."
+ },
+ "6": {
+  "ok": "&#10003; Correct! Clauses 01 to 05 all match, so X is instantiated to each airport in clause order.",
+  "a": "&#10007; London is the first answer, but the engine backtracks to find every other match too.",
+  "c": "&#10007; That is alphabetical order. Results come back in clause order: 01 to 05.",
+  "d": "&#10007; The goal contains a variable, so it returns the values of X, not just true."
+ },
+ "11": {
+  "ok": "&#10003; Correct! Each airport is tried in clause order; only London and Rome are hubs, so the other three are returned.",
+  "a": "&#10007; These are the hubs, which fail the NOT hub(X) condition.",
+  "c": "&#10007; Paris is the first answer, but the engine backtracks to find Madrid and Berlin as well.",
+  "d": "&#10007; The goal contains a variable, so it returns the values of X."
+ },
+ "12": {
+  "ok": "&#10003; Correct! flight(paris, Y) gives Y = rome, then flight(rome, Z) gives Z = berlin.",
+  "a": "&#10007; Rome is the stop (Y), not the destination. From Rome the only flight is to Berlin.",
+  "c": "&#10007; Rome is the middle airport Y. Only Z, the destination, is returned.",
+  "d": "&#10007; Paris &rarr; Rome &rarr; Berlin is a one-stop route, so the goal succeeds."
+ },
+ "16": {
+  "ok": "&#10003; Correct! Paris and Madrid both fly to Rome, and Rome is a hub, so both conditions succeed.",
+  "a": "&#10007; London is a hub, but this goal fixes the destination as Rome. Which airports fly to Rome?",
+  "c": "&#10007; Rome is the destination, not the departure. There is no flight from Rome to Rome.",
+  "d": "&#10007; flight(paris, rome) and hub(rome) are both true, so the goal succeeds."
+ },
+ "18": {
+  "ok": "&#10003; Correct! attends(asha, chess) (clause 05) gives monday; backtracking finds attends(asha, coding) (clause 07), which gives tuesday.",
+  "a": "&#10007; Monday is the first answer, but the engine backtracks and finds that Asha also attends coding, which meets on Tuesday.",
+  "c": "&#10007; The order follows the attends clauses: chess (05) comes before coding (07).",
+  "d": "&#10007; The goal has a variable, D, so it returns the days."
+ }
+};
+function pickOpt(qNum, letter, el) {
+  if (mcqChosen[qNum] && mcqChosen[qNum].locked) return;
+  var box = el.parentNode;
+  box.querySelectorAll('.opt').forEach(function(o){ o.classList.remove('selected'); });
+  el.classList.add('selected');
+  mcqChosen[qNum] = { letter: letter, locked: false };
+  submitMCQ(qNum, letter);
+}
+
+function submitMCQ(qNum, letter) {
+  if (mcqChosen[qNum] && mcqChosen[qNum].locked) return;
+  var correct = MCQ_CORRECT[qNum];
+  var isOk = (letter === correct);
+  var box = document.getElementById('opts' + qNum);
+  var fb  = document.getElementById('fb' + qNum);
+  if (box) {
+    box.querySelectorAll('.opt').forEach(function(el) {
+      el.classList.add('locked');
+      var m = el.getAttribute('onclick').match(/pickOpt\(\d+,'([a-d])'/);
+      var v = m ? m[1] : '';
+      if (v === correct)           el.classList.add(isOk ? 'correct' : 'reveal');
+      else if (v === letter && !isOk) el.classList.add('wrong');
+    });
+  }
+  if (fb) {
+    fb.style.display = 'block';
+    var fd = MCQ_FB[qNum];
+    fb.className = 'fb ' + (isOk ? 'fb-ok' : 'fb-bad');
+    fb.innerHTML = isOk ? fd.ok : (fd[letter] || '&#10007; Not quite — the correct answer is highlighted in green above.');
+  }
+  if (mcqChosen[qNum]) mcqChosen[qNum].locked = true;
+}
+
+
+
+
+// ══════════════════════════════════════════════════
+//  WORD CHIPS
+// ══════════════════════════════════════════════════
+var woptChosen = {};
+var WOPT_CORRECT = {"5": "b", "17": "a"};
+var WOPT_FB = {
+ "5": {
+  "ok": "&#10003; Correct! With nothing to instantiate, the only question is whether the goal can be satisfied.",
+  "a": "&#10007; A list of values only comes back when the goal contains a variable.",
+  "c": "&#10007; There is nothing to calculate. The goal either succeeds or fails: <strong>true or false</strong>.",
+  "d": "&#10007; Clause numbers are only labels. The result is <strong>true or false</strong>."
+ },
+ "17": {
+  "ok": "&#10003; Correct! A capital letter makes X a variable, so the engine finds every value that fits. (Here the result is false: Berlin has no outgoing flights.)",
+  "b": "&#10007; Lower-case x is a constant. Use a capital <strong>X</strong> to make a variable.",
+  "c": "&#10007; That would only ask whether there is a flight from Berlin to Rome. To find <em>every</em> destination, use a variable: <strong>X</strong>.",
+  "d": "&#10007; ? is not valid here. Use a variable starting with a capital letter: <strong>X</strong>."
+ }
+};
+function pickWopt(qNum, letter, el) {
+  if (woptChosen[qNum] && woptChosen[qNum].locked) return;
+  var container = el.parentNode;
+  container.querySelectorAll('.wopt').forEach(function(o){ o.classList.remove('selected'); });
+  el.classList.add('selected');
+  woptChosen[qNum] = { letter: letter, locked: false };
+  var correct = WOPT_CORRECT[qNum];
+  var isOk = (letter === correct);
+  container.querySelectorAll('.wopt').forEach(function(w) {
+    w.classList.add('locked');
+    var m = w.getAttribute('onclick').match(/pickWopt\(\d+,'([a-d])'/);
+    var v = m ? m[1] : '';
+    if (v === correct)           w.classList.add(isOk ? 'correct' : 'reveal');
+    else if (v === letter && !isOk) w.classList.add('wrong');
+  });
+  var fb = document.getElementById('fb' + qNum);
+  if (fb) {
+    fb.style.display = 'block';
+    var fd = WOPT_FB[qNum];
+    fb.className = 'fb ' + (isOk ? 'fb-ok' : 'fb-bad');
+    fb.innerHTML = isOk ? fd.ok : (fd[letter] || '&#10007; Not quite — the correct answer is highlighted above.');
+  }
+  woptChosen[qNum] = { letter: letter, locked: true };
+}
+
+
+// ══════════════════════════════════════════════════
+//  TRUE / FALSE
+// ══════════════════════════════════════════════════
+var TF_DATA = {
+ "1": {
+  "ok": "&#10003; True! It matches clause 04.",
+  "bad": "&#10007; This succeeds — it matches clause 04 exactly."
+ },
+ "2": {
+  "ok": "&#10003; Correct — it fails. There is only flight(london, paris); the order of the arguments matters.",
+  "bad": "&#10007; This fails. Clause 08 is flight(london, paris), which is the opposite direction."
+ },
+ "3": {
+  "ok": "&#10003; Correct — it fails. Only london and rome are hubs.",
+  "bad": "&#10007; This fails. There is no hub(paris) fact."
+ },
+ "4": {
+  "ok": "&#10003; True! It matches clause 12.",
+  "bad": "&#10007; This succeeds — it matches clause 12."
+ },
+ "5": {
+  "ok": "&#10003; Correct — it fails. Rome is an airport, but hub(rome) is true, so NOT hub(rome) fails.",
+  "bad": "&#10007; This fails. Rome is a hub, so the NOT condition in rule 13 fails."
+ },
+ "6": {
+  "ok": "&#10003; Correct — False! A lower-case x is a constant, so this asks about an airport called \"x\". It fails.",
+  "bad": "&#10007; This is False. Only a capital letter makes a variable; lower-case x is a constant."
+ },
+ "7": {
+  "ok": "&#10003; True! That is how a goal like flight(london, X) returns both paris and madrid.",
+  "bad": "&#10007; This is True. Backtracking finds every answer."
+ },
+ "8": {
+  "ok": "&#10003; True! For example, flight(berlin, X) returns false.",
+  "bad": "&#10007; This is True. With no match, nothing can be instantiated, so the goal fails."
+ },
+ "9": {
+  "ok": "&#10003; Correct — False! It is valid and returns every flight pair.",
+  "bad": "&#10007; This is False. A goal can have several variables."
+ },
+ "10": {
+  "ok": "&#10003; True! This is how the engine finds alternative answers.",
+  "bad": "&#10007; This is True. That is the definition of backtracking."
+ },
+ "11": {
+  "ok": "&#10003; Correct — False! They are checked from left to right.",
+  "bad": "&#10007; This is False. Conditions are checked left to right."
+ },
+ "12": {
+  "ok": "&#10003; True! onestop(london, Z) returns rome twice: via Paris and via Madrid.",
+  "bad": "&#10007; This is True. Each successful route gives a result, even if the value is the same."
+ },
+ "13": {
+  "ok": "&#10003; Correct — False! It backtracks and tries other values before giving up.",
+  "bad": "&#10007; This is False. A failed condition triggers backtracking, not the end of the search."
+ },
+ "14": {
+  "ok": "&#10003; True! Ben attends coding (06), which meets on Tuesday (04).",
+  "bad": "&#10007; This succeeds: attends(ben, coding) and meets(coding, tuesday)."
+ },
+ "15": {
+  "ok": "&#10003; Correct — it fails. Ben only attends coding, which meets on Tuesday.",
+  "bad": "&#10007; This fails. No club that Ben attends meets on Monday."
+ },
+ "16": {
+  "ok": "&#10003; True! It matches clause 07.",
+  "bad": "&#10007; This succeeds — it matches clause 07."
+ },
+ "17": {
+  "ok": "&#10003; Correct — it fails. Chess is a club, not a student.",
+  "bad": "&#10007; This fails. There is no student(chess) fact."
+ }
+};
+function doTF(n, userAns, correctAns) {
+  var row = document.getElementById('tf' + n);
+  if (!row || row.classList.contains('done')) return;
+  row.classList.add('done');
+  var isOk = (userAns === correctAns);
+  row.querySelectorAll('.tf-btn').forEach(function(b) {
+    var bT = b.textContent.trim() === 'True';
+    if (bT === userAns)             b.className = isOk ? 'tf-btn ok' : 'tf-btn bad';
+    if (!isOk && bT === correctAns) b.className = 'tf-btn show';
+  });
+  var fb = document.createElement('div');
+  fb.style.cssText = 'margin-top:8px;padding:10px 14px;border-radius:6px;font-size:13pt;line-height:1.6;font-family:Lato,sans-serif;';
+  fb.style.background = isOk ? '#e8f5e9' : '#ffebee';
+  fb.style.color      = isOk ? '#1b5e20' : '#7f0000';
+  fb.style.border     = isOk ? '1px solid #81c784' : '1px solid #ef9a9a';
+  fb.innerHTML = isOk ? TF_DATA[n].ok : TF_DATA[n].bad;
+  row.appendChild(fb);
+}
+
+
+// ══════════════════════════════════════════════════
+//  MATCH ACTIVITIES
+// ══════════════════════════════════════════════════
+function runMatch(matchId, btnId, resId, okMsg, badMsg) {
+  var rows = document.querySelectorAll('#' + matchId + ' .match-row');
+  var allOk = true;
+  rows.forEach(function(row) {
+    row.classList.remove('ok','bad');
+    var sel = row.querySelector('.match-sel');
+    if (sel.value === sel.getAttribute('data-ans')) row.classList.add('ok');
+    else { row.classList.add('bad'); allOk = false; }
+  });
+  var res = document.getElementById(resId);
+  res.style.display = 'block';
+  if (allOk) {
+    res.className = 'match-result fb fb-ok';
+    res.innerHTML = '&#10003; ' + okMsg;
+    document.getElementById(btnId).disabled = true;
+    rows.forEach(function(r){ r.querySelector('.match-sel').disabled = true; });
+  } else {
+    res.className = 'match-result fb fb-bad';
+    res.innerHTML = '&#10007; ' + badMsg;
+  }
+}
+
+
+
+function checkMatch1() {
+  runMatch('match1','match1-btn','match1-res',
+    "All correct! These are the words examiners expect when you explain how a goal is satisfied.",
+    "One or more are wrong \u2014 check those in red. Hint: instantiation is about variables; backtracking is about finding more answers.");
+}
+function checkMatch2() {
+  runMatch('match2','match2-btn','match2-res',
+    "All correct! Check which argument is the variable, then scan the clauses from top to bottom.",
+    "One or more are wrong. Hint: in flight(A, B), A is where the flight leaves from and B is where it lands.");
+}
+function checkMatch3() {
+  runMatch('match3','match3-btn','match3-res',
+    "All correct! A yes/no question needs no variable; a \"which\" or \"where\" question needs one.",
+    "One or more are wrong. Hint: \"from Rome\" puts rome first; \"to Rome\" puts rome second.");
+}
+
+// ══════════════════════════════════════════════════
+//  DRAG & DROP ENGINE
+// ══════════════════════════════════════════════════
+var _drag = null;
+document.addEventListener('dragstart', function(e) {
+  var t = e.target;
+  if (t.classList.contains('drag-chip') && !t.classList.contains('locked')) {
+    _drag = t; e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', t.textContent);
+  }
+});
+document.addEventListener('dragover', function(e) {
+  var t = e.target;
+  while (t && t !== document.body) {
+    if (t.classList.contains('drop-zone') || t.classList.contains('drag-bank') || t.classList.contains('sort-zone')) {
+      e.preventDefault(); t.classList.add('drag-over'); return;
+    }
+    t = t.parentNode;
+  }
+});
+document.addEventListener('dragleave', function(e) {
+  var t = e.target; if (t && t.classList) t.classList.remove('drag-over');
+});
+document.addEventListener('drop', function(e) {
+  e.preventDefault(); if (!_drag) return;
+  var tgt = e.target;
+  while (tgt && tgt !== document.body) {
+    if (tgt.classList.contains('drop-zone') || tgt.classList.contains('drag-bank') || tgt.classList.contains('sort-zone')) break;
+    tgt = tgt.parentNode;
+  }
+  if (!tgt || tgt === document.body) return;
+  tgt.classList.remove('drag-over');
+  if (tgt.classList.contains('drop-zone')) {
+    var displaced = tgt.querySelector('.drag-chip');
+    if (displaced) {
+      var oid = displaced.getAttribute('data-origin') || '';
+      var ori = oid ? document.getElementById(oid) : _drag.parentNode;
+      if (ori) ori.appendChild(displaced);
+      displaced.removeAttribute('data-origin');
+    }
+    _drag.setAttribute('data-origin', _drag.parentNode.id || '');
+    _drag.parentNode.removeChild(_drag);
+    tgt.appendChild(_drag);
+  } else {
+    if (tgt === _drag.parentNode) { _drag = null; return; }
+    _drag.removeAttribute('data-origin');
+    _drag.parentNode.removeChild(_drag);
+    tgt.appendChild(_drag);
+  }
+  _drag = null;
+});
+
+function getDZ(id) { var z=document.getElementById(id); var c=z?z.querySelector('.drag-chip'):null; return c?c.textContent.trim():''; }
+function getSort(id) { var z=document.getElementById(id); if(!z)return[]; return Array.from(z.querySelectorAll('.drag-chip')).map(function(c){return c.textContent.trim();}); }
+
+// ══════════════════════════════════════════════════
+//  SLOT CHECKER — used by activities 7, 11, 16, 18, 22
+// ══════════════════════════════════════════════════
+var DONE = {};
+function lockChips(n, ids) {
+  document.querySelectorAll('#bank' + n + ' .drag-chip').forEach(function(c){ c.classList.add('locked'); });
+  ids.forEach(function(id){ var z=document.getElementById(id); if(z) z.querySelectorAll('.drag-chip').forEach(function(c){ c.classList.add('locked'); }); });
+}
+function checkSlots(n, ids, ans, okMsg, hints, emptyMsg) {
+  if (DONE[n]) return;
+  var vals = ids.map(getDZ);
+  var res = document.getElementById('res' + n);
+  res.style.display = 'block';
+  if (vals.some(function(v){ return v === ''; })) {
+    res.className = 'drag-result fb fb-bad';
+    res.innerHTML = '&#10007; ' + emptyMsg;
+    return;
+  }
+  var wrong = [];
+  vals.forEach(function(v, i){ if (v !== ans[i]) wrong.push(hints[i]); });
+  if (wrong.length === 0) {
+    DONE[n] = true;
+    document.getElementById('btn' + n).disabled = true;
+    lockChips(n, ids);
+    res.className = 'drag-result fb fb-ok';
+    res.innerHTML = '&#10003; ' + okMsg;
+  } else {
+    res.className = 'drag-result fb fb-bad';
+    res.innerHTML = '&#10007; Not quite. ' + wrong.slice(0, 2).join(' ') + (wrong.length > 2 ? ' (' + (wrong.length - 2) + ' more to fix.)' : '');
+  }
+}
+
+function checkCols(n, cols, names, total, okMsg, tip) {
+  if (DONE[n]) return;
+  var res = document.getElementById('res' + n);
+  res.style.display = 'block';
+  var count = 0, wrong = [];
+  Object.keys(cols).forEach(function(zone) {
+    getSort(zone).forEach(function(v) {
+      count++;
+      if (cols[zone].indexOf(v) === -1) {
+        var home = Object.keys(cols).filter(function(z){ return cols[z].indexOf(v) !== -1; })[0];
+        wrong.push('“' + v + '” belongs in <strong>' + names[home] + '</strong>.');
+      }
+    });
+  });
+  if (count < total) { res.className='drag-result fb fb-bad'; res.innerHTML='&#10007; Drag all ' + total + ' chips into a column before checking.'; return; }
+  if (wrong.length === 0) {
+    DONE[n] = true; document.getElementById('btn' + n).disabled = true;
+    Object.keys(cols).forEach(function(z){ document.querySelectorAll('#' + z + ' .drag-chip').forEach(function(c){ c.classList.add('locked'); }); });
+    res.className = 'drag-result fb fb-ok'; res.innerHTML = '&#10003; ' + okMsg;
+  } else {
+    res.className = 'drag-result fb fb-bad'; res.innerHTML = '&#10007; ' + wrong.slice(0, 2).join(' ') + ' ' + tip;
+  }
+}
+
+
+function checkDrop8() {
+  checkSlots(8, ["dz8a", "dz8b", "dz8c"],
+    ["flight(X, rome)", "flight(madrid, X)", "hub(X)"],
+    "All correct! Put the known value in its argument position and a variable where the unknown answer goes.",
+    ["Q1: Rome is the destination (second argument) — <strong>flight(X, rome)</strong>.", "Q2: Madrid is the departure (first argument) — <strong>flight(madrid, X)</strong>.", "Q3: predicates start with a lower-case letter — <strong>hub(X)</strong>."],
+    "Drag a chip into every gap before checking.");
+}
+function checkDrop10() {
+  checkSlots(10, ["dz10a", "dz10b", "dz10c", "dz10d", "dz10e"],
+    ["X = london, Y = paris (clause 08)", "flight(paris, berlin) fails, so it backtracks", "X = london, Y = madrid (clause 09); flight(madrid, berlin) fails, so it backtracks", "X = paris, Y = rome (clause 10); flight(rome, berlin) succeeds, so X = paris is output", "X = madrid, Y = rome (clause 11); flight(rome, berlin) succeeds, so X = madrid is output"],
+    "Correct! The engine works through flight(X, Y) in clause order, checking flight(Y, berlin) each time. The result is X = paris, madrid.",
+    ["Step 1: the first flight fact is clause 08.", "Step 2: there is no flight from Paris to Berlin, so it backtracks.", "Step 3: next it tries clause 09, which also fails.", "Step 4: clause 10 gives Y = rome, and Rome does fly to Berlin.", "Step 5: clause 11 gives the second answer."],
+    "Drag a step into every slot before checking.");
+}
+function checkDrop15() {
+  checkSlots(15, ["dz15a", "dz15b", "dz15c"],
+    ["flight(X, Y)", "AND", "flight(Y, X)."],
+    "All correct! Swapping X and Y in the second condition checks the return flight. With this knowledge base, twoway(X, Y) returns false, as every flight is one way.",
+    ["Gap 1: first the outward flight — <strong>flight(X, Y)</strong>.", "Gap 2: both flights are needed — <strong>AND</strong>.", "Gap 3: the return flight swaps the arguments — <strong>flight(Y, X).</strong>"],
+    "Drag a chip into every gap before checking.");
+}
+function checkDrop20() {
+  checkSlots(20, ["dz20a", "dz20b", "dz20c", "dz20d", "dz20e", "dz20f"],
+    ["goal", "top to bottom", "variable", "instantiated", "backtracks", "false"],
+    "All correct — you can now write facts and rules, and write goals that use them!",
+    ["Gap 1: a question — <strong>goal</strong>.", "Gap 2: the search order — <strong>top to bottom</strong>.", "Gap 3: what gets a value — <strong>variable</strong>.", "Gap 4: being given a value — <strong>instantiated</strong>.", "Gap 5: going back for more answers — <strong>backtracks</strong>.", "Gap 6: no match — <strong>false</strong>."],
+    "Drag a word into every gap before checking.");
+}
+</script>
+</body>
+</html>
